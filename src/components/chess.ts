@@ -33,3 +33,9 @@ export class General extends Chess {
     super("general", pos);
   }
 }
+
+export class Soldier extends Chess {
+  constructor(pos: Victor) {
+    super("soldier", pos);
+  }
+}
