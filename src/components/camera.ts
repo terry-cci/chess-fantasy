@@ -25,12 +25,18 @@ export class Camera {
         );
 
       this.pos.x = Math.max(
-        Math.min(this.pos.x, field.tileMap[0].length * tileSize),
+        Math.min(
+          this.pos.x,
+          field.tileMap[0].length * tileSize - canvas.width / 4 / this.zoom
+        ),
         canvas.width / 4 / this.zoom
       );
 
       this.pos.y = Math.max(
-        Math.min(this.pos.y, field.tileMap.length * tileSize),
+        Math.min(
+          this.pos.y,
+          field.tileMap.length * tileSize - canvas.height / 4 / this.zoom
+        ),
         canvas.height / 4 / this.zoom
       );
     }

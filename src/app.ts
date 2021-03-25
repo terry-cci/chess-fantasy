@@ -25,17 +25,7 @@ function draw() {
     ctx.imageSmoothingEnabled = false;
 
     // field
-    ctx.drawImage(
-      field.renderer,
-      camera.pos.x - canvas.width / 2 / camera.zoom,
-      camera.pos.y - canvas.height / 2 / camera.zoom,
-      canvas.width / camera.zoom,
-      canvas.height / camera.zoom,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    field.render();
 
     requestAnimationFrame(draw);
   }

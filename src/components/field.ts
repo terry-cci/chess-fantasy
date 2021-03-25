@@ -1,7 +1,8 @@
 import mapStr from "../data/map/0";
-import fbImg from "../assets/fallback.png";
+import fbImg from "../assets/tiles/fallback.png";
 import Victor from "victor";
-import { camera, canvas } from "../app";
+import { camera, canvas, ctx } from "../app";
+import { Chess, General } from "./chess";
 
 function parseTileMap(str: string) {
   return str.split("\n").map((r) => r.split(""));
@@ -13,6 +14,8 @@ export class Field {
   tileMap: string[][];
   renderer: HTMLCanvasElement;
   rendererCtx: CanvasRenderingContext2D;
+
+  chess: Chess[] = [new General(new Victor(5, 11))];
 
   constructor() {
     this.tileMap = parseTileMap(mapStr);
@@ -37,7 +40,7 @@ export class Field {
         const img = new Image();
 
         try {
-          img.src = (await import(`../assets/${t}.png`)).default;
+          img.src = (await import(`../assets/tiles/${t}.png`)).default;
         } catch (e) {
           img.src = fbImg;
         }
@@ -53,5 +56,30 @@ export class Field {
         });
       })
     );
+  }
+
+  public render() {
+    ctx.drawImage(
+      this.renderer,
+      camera.pos.x - canvas.width / 2 / camera.zoom,
+      camera.pos.y - canvas.height / 2 / camera.zoom,
+      canvas.width / camera.zoom,
+      canvas.height / camera.zoom,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-camera.pos.x, -camera.pos.y);
+
+    this.chess.forEach((c) => {
+      c.render();
+    });
+
+    ctx.restore();
   }
 }
