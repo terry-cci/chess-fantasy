@@ -1,32 +1,42 @@
 import { canvas, field } from "../app";
 import { tileSize } from "./field";
 
-export class Camera {
-  x = 0;
-  y = 0;
-  lastPos: { x: number; y: number } | null = null;
-  panStart: { x: number; y: number } | null = null;
+import Victor from "victor";
 
-  startPan(x: number, y: number) {
-    this.lastPos = { x: this.x, y: this.y };
-    this.panStart = { x, y };
+export class Camera {
+  pos = new Victor(0, 0);
+  lastPos = this.pos.clone();
+  panStart = this.pos.clone();
+  panning = false;
+  zoom = 2;
+
+  public startPan(start: Victor) {
+    this.panStart = start;
+    this.lastPos = this.pos;
+    this.panning = true;
   }
 
-  updatePan(x: number, y: number) {
-    if (this.lastPos && this.panStart) {
-      this.x = this.lastPos.x - x + this.panStart.x;
-      this.y = this.lastPos.y - y + this.panStart.y;
+  public updatePan(cur: Victor) {
+    if (this.panning) {
+      this.pos = this.lastPos
+        .clone()
+        .add(
+          cur.clone().subtract(this.panStart).invert().divideScalar(this.zoom)
+        );
 
-      this.x = Math.max(
-        Math.min(this.x, field.tileMap[0].length * tileSize),
-        0
+      this.pos.x = Math.max(
+        Math.min(this.pos.x, field.tileMap[0].length * tileSize),
+        canvas.width / 4 / this.zoom
       );
-      this.y = Math.max(Math.min(this.y, field.tileMap.length * tileSize), 0);
+
+      this.pos.y = Math.max(
+        Math.min(this.pos.y, field.tileMap.length * tileSize),
+        canvas.height / 4 / this.zoom
+      );
     }
   }
 
   endPan() {
-    this.lastPos = null;
-    this.panStart = null;
+    this.panning = false;
   }
 }

@@ -2,59 +2,64 @@ import { Camera } from "./components/camera";
 import { Field } from "./components/field";
 import "./style.css";
 
+import Victor from "victor";
+
 export const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 export const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 export let canvasRect = canvas.getClientRects();
+export const field = new Field();
+export const camera = new Camera();
 
 function resizeCanvas() {
-  canvas.style.width = window.innerWidth * 0.8 + "px";
-  canvas.style.height = window.innerWidth * 0.45 + "px";
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
   canvasRect = canvas.getClientRects();
+  camera.pos = new Victor(0, 0);
 }
-
-const camera = new Camera();
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 function draw() {
   if (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false;
 
     // field
     ctx.drawImage(
       field.renderer,
-      camera.x - canvas.width / 2,
-      camera.y - canvas.height / 2,
-      canvas.width,
-      canvas.height,
+      camera.pos.x - canvas.width / 2 / camera.zoom,
+      camera.pos.y - canvas.height / 2 / camera.zoom,
+      canvas.width / camera.zoom,
+      canvas.height / camera.zoom,
       0,
       0,
       canvas.width,
       canvas.height
     );
+
     requestAnimationFrame(draw);
   }
 }
 
-canvas.width = 800;
-canvas.height = canvas.width * 0.5625;
-
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-document.addEventListener("touchstart", (e) => {
+canvas.addEventListener("wheel", (e) => {
+  camera.zoom += -e.deltaY / 400;
+  camera.zoom = Math.max(Math.min(camera.zoom, 4), 1);
+});
+canvas.addEventListener("touchstart", (e) => {
   const { clientX: x, clientY: y } = e.touches[0];
-  camera.startPan(x, y);
+  camera.startPan(new Victor(x, y));
 });
-document.addEventListener("mousedown", (e) => {
+canvas.addEventListener("mousedown", (e) => {
   const { clientX: x, clientY: y } = e;
-  camera.startPan(x, y);
+  camera.startPan(new Victor(x, y));
 });
-document.addEventListener("touchmove", (e) => {
+canvas.addEventListener("touchmove", (e) => {
   const { clientX: x, clientY: y } = e.touches[0];
-  camera.updatePan(x, y);
+  camera.updatePan(new Victor(x, y));
 });
-document.addEventListener("mousemove", (e) => {
+canvas.addEventListener("mousemove", (e) => {
   const { clientX: x, clientY: y } = e;
-  camera.updatePan(x, y);
+  camera.updatePan(new Victor(x, y));
 });
 document.addEventListener("touchend", () => {
   camera.endPan();
@@ -62,6 +67,4 @@ document.addEventListener("touchend", () => {
 document.addEventListener("mouseup", () => {
   camera.endPan();
 });
-
-export const field = new Field();
 draw();
