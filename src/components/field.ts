@@ -67,6 +67,8 @@ export class Field {
   }
 
   public render() {
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(
       this.renderer,
       camera.pos.x - canvas.width / 2 / camera.zoom,
@@ -78,6 +80,7 @@ export class Field {
       canvas.width,
       canvas.height
     );
+    ctx.restore();
 
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);

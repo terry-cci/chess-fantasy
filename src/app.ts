@@ -3,6 +3,7 @@ import { Field } from "./components/field";
 import "./style.css";
 
 import Victor from "victor";
+import { draw as uiDraw, uiCanvas } from "./ui";
 
 export const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 export const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -19,14 +20,23 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
+let lastDraw = performance.now();
+
 function draw() {
   if (ctx) {
+    const now = performance.now();
+    const dt = now - lastDraw;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
 
     // field
     field.render();
 
+    uiDraw(dt);
+    ctx.drawImage(uiCanvas, 0, 0);
+
+    lastDraw = now;
     requestAnimationFrame(draw);
   }
 }
